@@ -48,21 +48,23 @@ public class Renderer {
     public void init(Window window) throws Exception {
         // Create shader
         shaderProgram = new ShaderProgram();
-        shaderProgram.createVertexShader(Utils.loadResource("/vertex.vs.glsl"));
-        shaderProgram.createFragmentShader(Utils.loadResource("/fragment.fs.glsl"));
+        shaderProgram.createVertexShader(Utils.loadResource("vertex.vs"));
+        shaderProgram.createFragmentShader(Utils.loadResource("fragment.fs"));
         shaderProgram.link();
 
         // Create projection matrix
         float aspectRatio = (float) window.getWidth() / window.getHeight();
         projectionMatrix = new Matrix4f().setPerspective(Renderer.FOV, aspectRatio, Renderer.Z_NEAR, Renderer.Z_FAR);
         shaderProgram.createUniform("projectionMatrix");
-        shaderProgram.createUniform("worldMatrix");
+        shaderProgram.createUniform("modelViewMatrix");
         shaderProgram.createUniform("textureSampler");
+        shaderProgram.createUniform("useColour");
+        shaderProgram.createUniform("colour");
 
 
     }
 
-    public void render(Window window, GameItem[] gameItems) {
+    public void render(Window window, GameItem[] gameItems, Camera camera) {
         clear();
 
         if(window.isResized()) {
@@ -71,14 +73,24 @@ public class Renderer {
         }
 
         shaderProgram.bind();
+
         Matrix4f projectionMatrix = transformation.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);
         shaderProgram.setUniform("projectionMatrix", projectionMatrix);
+
+        Matrix4f viewMatrix = transformation.getViewMatrix(camera);
+
         shaderProgram.setUniform("textureSampler", 0);
 
         for(GameItem gameItem : gameItems) {
-            Matrix4f worldMatrix = transformation.getWorldMatrix(gameItem.getPosition(), gameItem.getRotation(), gameItem.getScale());
-            shaderProgram.setUniform("worldMatrix", worldMatrix);
-            gameItem.getMesh().render();
+            Mesh mesh = gameItem.getMesh();
+
+            Matrix4f modelViewMatrix = transformation.getModelViewMatrix(gameItem, viewMatrix);
+            shaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
+
+            shaderProgram.setUniform("colour", mesh.getColour());
+            shaderProgram.setUniform("useColour", mesh.isTextured() ? 0 : 1);
+
+            mesh.render();
         }
         shaderProgram.unbind();
     }

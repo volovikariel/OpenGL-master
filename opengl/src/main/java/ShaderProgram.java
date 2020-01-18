@@ -1,4 +1,5 @@
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
 
@@ -95,6 +96,10 @@ public class ShaderProgram {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             GL20.glUniformMatrix4fv(uniforms.get(uniformName), false, value.get(stack.mallocFloat(16)));
         }
+    }
+
+    public void setUniform(String uniformName, Vector3f colour) {
+        // TODO: Implement
     }
 
     public void setUniform(String uniformName, int value) {

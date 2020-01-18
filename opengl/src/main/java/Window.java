@@ -88,6 +88,9 @@ public class Window {
 
         //Make things not look messed up
         glEnable(GL_DEPTH_TEST);
+
+        // See the vertices
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     }
 
     public void setClearColour(float r, float g, float b, float alpha) {
@@ -112,6 +115,10 @@ public class Window {
 
     public int getHeight() {
         return height;
+    }
+
+    public long getWindowHandle() {
+        return windowHandle;
     }
 
     public boolean isResized() {
